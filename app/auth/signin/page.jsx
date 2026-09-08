@@ -121,9 +121,7 @@ export default function SignInPage() {
           Recruitment 2026
         </CardTitle>
 
-        <CardDescription>
-          <p className="mt-3">Candidate Portal</p>
-        </CardDescription>
+        <CardDescription className="mt-3">Candidate Portal</CardDescription>
 
         <CardContent>
           <div className="mt-3">
