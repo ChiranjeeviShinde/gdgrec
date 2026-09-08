@@ -1,0 +1,43 @@
+import { connect, serializeFirestoreData } from "@/lib/db";
+import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 },
+      );
+    }
+
+    if (session.user.role !== "admin") {
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 },
+      );
+    }
+    const db = await connect();
+    const snapshot = await db.collection("formData").get();
+    const applicants = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      _id: doc.id,
+      ...serializeFirestoreData(doc.data()),
+    }));
+
+    return NextResponse.json({ applicants });
+  } catch (error) {
+    console.error("Error fetching applicants:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch applicants" },
+      { status: 500 },
+    );
+  }
+}
